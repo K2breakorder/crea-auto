@@ -79,6 +79,19 @@ def clinic_block(cfg):
 - 予約: ホットペッパービューティー {c['hotpepper']} ／ 公式サイト {c['website']}"""
 
 
+def strategy_block(cfg):
+    st = cfg.get("strategy") or {}
+    if not st:
+        return ""
+    return f"""## 目標と戦略（すべての投稿の土台）
+- 目標: {st.get('goal','')}
+- 強み（毎回どれか1つを具体的に伝える。最上級・比較表現は使わない）: {' / '.join(st.get('strengths', []))}
+- 地域キーワード（自然に1〜2個入れる）: {' / '.join(st.get('local_keywords', []))}
+- 検索される言葉（Googleマップ・HPBで探す人の言葉。本文やタイトルに自然に含める）: {' / '.join(st.get('search_phrases', []))}
+- 口コミのお願い: 投稿の約{int(st.get('review_ask_ratio', 0.2)*100)}%で、「来院された方はGoogleマップに感想をいただけると励みになります」と自然にお願いする（特典・割引との引き換えは絶対に書かない。お客様の声の紹介・引用もしない）
+- 「No.1」「一番」「三島で最高」などの表現は使わず、選ばれる理由を具体的な事実で示す"""
+
+
 def rules_block():
     return f"""## 法規ルール（あはき・柔整広告ガイドライン、薬機法、景品表示法）— 厳守
 - 効果を断定しない（「〜が楽になる方が多い」「〜を目指す」「〜をサポート」など）
@@ -97,9 +110,12 @@ def research(cfg, start):
 1. 来週の静岡・三島周辺の天気・気温の傾向と、季節の体調トピック
 2. 三島周辺の来週の行事・イベント（あれば）
 3. 40〜60代女性のからだ・美容で今話題になっていること
-4. Instagram・Threads・Googleマップ運用の最近のポイント
+4. Instagram・Threads・Googleマップ運用の最近のポイント（特にGoogleマップ上位表示＝MEOに効くこと）
+5. 三島市の鍼灸・整体の上位院が最近どんなテーマで発信し、どんな点が評価されているか（差別化のため。他院名を投稿に出すことはしない）
 
 ターゲット: {cfg['clinic']['target']}
+
+{strategy_block(cfg)}
 
 ## 過去の実績（好調な型を増やし、不調な型は変える）
 {performance_summary()}
@@ -111,7 +127,8 @@ def research(cfg, start):
 テーマ: （来週の投稿全体の軸を一言）
 メモ:
 - （投稿に使える事実を箇条書きで6〜10個。それぞれ出典URLを括弧で添える。不確かなものは書かない）
-- （好調だった型を踏まえた来週の作り方の方針を1〜2行）"""
+- （好調だった型を踏まえた来週の作り方の方針を1〜2行）
+- （上位院と比べて、Creaが来週強調すべき違いを1〜2行）"""
     tools = [{"type": cfg["ai"]["web_search_tool"], "name": "web_search",
               "max_uses": cfg["ai"]["max_searches"],
               "user_location": {"type": "approximate", "city": "Mishima", "region": "Shizuoka",
@@ -132,6 +149,8 @@ def build_channel_prompt(cfg, ch, slots, theme, notes):
 枠ごとに切り口（悩み・季節・からだの仕組み・セルフケア・来院のきっかけ）を変え、同じ内容を繰り返さない。
 
 {clinic_block(cfg)}
+
+{strategy_block(cfg)}
 
 ## 来週のテーマ
 {theme}
