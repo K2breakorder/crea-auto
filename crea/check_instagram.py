@@ -13,6 +13,7 @@ checks = [
     ("FB方式 ビジネス経由", f"https://graph.facebook.com/{V}/me/businesses",
      {"fields": "id,name,owned_instagram_accounts{id,username},instagram_accounts{id,username}"}),
 ]
+checks.append(("トークンの許可情報", f"https://graph.facebook.com/{V}/debug_token", {"input_token": tok}))
 for name, url, params in checks:
     try:
         r = requests.get(url, params=dict(params, access_token=tok), timeout=30)
@@ -20,3 +21,18 @@ for name, url, params in checks:
         print(f"\n== {name}: HTTP {r.status_code}\n{body}")
     except Exception as e:
         print(f"\n== {name}: 例外 {e}")
+
+# 自動検出したIDでアカウント名を確認（publishers.ig_user_id と同じ考え方）
+try:
+    d = requests.get(f"https://graph.facebook.com/{V}/debug_token",
+                     params={"input_token": tok, "access_token": tok}, timeout=30).json().get("data", {})
+    ids = [t for sc in d.get("granular_scopes", [])
+           if sc.get("scope") in ("instagram_content_publish", "instagram_basic") for t in sc.get("target_ids", [])]
+    for iid in dict.fromkeys(ids):
+        r = requests.get(f"https://graph.facebook.com/{V}/{iid}",
+                         params={"fields": "id,username", "access_token": tok}, timeout=30)
+        print("\n== 自動検出したInstagramアカウント:", r.text.replace(tok, "***")[:300])
+    if not ids:
+        print("\n== 自動検出できず: granular_scopes にInstagramの対象IDがありません")
+except Exception as e:
+    print("\n== 自動検出できず:", e)
