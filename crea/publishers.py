@@ -4,6 +4,8 @@ import requests
 from .common import DRY_RUN, image_public_url, notify, now
 
 IG_VER = os.environ.get("IG_API_VERSION", "v23.0")
+# Metaの統合ログイン（システムユーザートークン）は graph.facebook.com を使う
+IG_HOST = os.environ.get("IG_API_HOST") or "graph.facebook.com"
 T = 60
 
 
@@ -24,13 +26,13 @@ def _check(r):
     return r.json() if r.text else {}
 
 
-# ---------------- Instagram（Instagramログイン方式のAPI） ----------------
+# ---------------- Instagram（統合ログイン／システムユーザートークン） ----------------
 def post_instagram(item):
     url = image_public_url(item["image"])
     if DRY_RUN:
         return {"dry_run": True, "image_url": url}
     ig, tok = _env("IG_USER_ID"), _env("IG_ACCESS_TOKEN")
-    base = f"https://graph.instagram.com/{IG_VER}"
+    base = f"https://{IG_HOST}/{IG_VER}"
     c = _check(requests.post(f"{base}/{ig}/media", timeout=T,
                              data={"image_url": url, "caption": item["text"], "access_token": tok}))
     cid = c["id"]
