@@ -65,16 +65,10 @@ def performance_summary():
     return top + "\n" + low
 
 
-def build_prompt(cfg, slots):
+def clinic_block(cfg):
     c = cfg["clinic"]
-    slot_lines = "\n".join(
-        f'{i+1}. id={ch}-{d:%m%d}-{t.replace(":","")} / {ch} / {d:%Y-%m-%d}({"月火水木金土日"[d.weekday()]}) {t}'
-        for i, (ch, d, t) in enumerate(slots))
-    guides = "\n".join(f"■{k}: {v}" for k, v in CHANNEL_GUIDE.items()
-                       if any(s[0] == k for s in slots))
-    return f"""あなたは静岡県三島市の「{c['name']}」の集客担当です。来週1週間分の投稿をすべて作ってください。
-
-## 店舗情報（ここにない事実は書かない）
+    return f"""## 店舗情報（ここにない事実は書かない）
+- 店名: {c['name']}（静岡県三島市）
 - コンセプト: {c['concept']}
 - ターゲット: {c['target']}
 - 住所: {c['address']}（{c['access']}）／駐車場: {c['parking']}
@@ -82,14 +76,30 @@ def build_prompt(cfg, slots):
 - 施術者: {c['qualifications']}
 - メニュー: {' / '.join(c['menus'])}
 - LINE: {c['line_url']}（{c['line_benefit']}）
-- 予約: ホットペッパービューティー {c['hotpepper']} ／ 公式サイト {c['website']}
+- 予約: ホットペッパービューティー {c['hotpepper']} ／ 公式サイト {c['website']}"""
 
-## まず最新情報を調べる（web検索を使う）
-1. 来週の静岡・三島周辺の天気や気温の傾向、季節の体調トピック（{now():%Y年%m月}時点）
-2. 三島周辺の来週の行事・イベント（あれば季節の話題に使う）
+
+def rules_block():
+    return f"""## 法規ルール（あはき・柔整広告ガイドライン、薬機法、景品表示法）— 厳守
+- 効果を断定しない（「〜が楽になる方が多い」「〜を目指す」「〜をサポート」など）
+- 最上級・他院比較・保証・体験談・ビフォーアフター・病名・「治療/患者/診療」の語は使わない
+- 料金や割引は書かない（クーポンは予約ページで確認、と誘導する）
+- 下記の語は全媒体で使用禁止:
+{compliance.rules_as_prompt('instagram')}
+- hpb_blog だけは、さらに次の語も使用禁止（鍼灸は「東洋の叡智」と言い換える）:
+{compliance.rules_as_prompt('hpb_blog', hpb_only=True)}"""
+
+
+def research(cfg, start):
+    """ステップ1: 最新情報を検索して、来週のテーマと材料をまとめる"""
+    prompt = f"""あなたは静岡県三島市の整体・美容ケアサロン「{cfg['clinic']['name']}」の集客担当です。
+{start:%Y年%m月%d日}からの1週間の投稿づくりのために、web検索で最新情報を調べてください。
+1. 来週の静岡・三島周辺の天気・気温の傾向と、季節の体調トピック
+2. 三島周辺の来週の行事・イベント（あれば）
 3. 40〜60代女性のからだ・美容で今話題になっていること
-4. Instagram・Threads・Googleマップの最近の運用のポイント
-調べた内容は投稿に自然に活かす。不確かな情報は使わない。
+4. Instagram・Threads・Googleマップ運用の最近のポイント
+
+ターゲット: {cfg['clinic']['target']}
 
 ## 過去の実績（好調な型を増やし、不調な型は変える）
 {performance_summary()}
@@ -97,27 +107,50 @@ def build_prompt(cfg, slots):
 ## 最近扱ったテーマ（重複させない）
 {chr(10).join(recent_topics()) or '（なし）'}
 
-## 投稿枠（この順に全部作る）
+調べ終えたら、次の形式だけで答える（前置き不要）:
+テーマ: （来週の投稿全体の軸を一言）
+メモ:
+- （投稿に使える事実を箇条書きで6〜10個。それぞれ出典URLを括弧で添える。不確かなものは書かない）
+- （好調だった型を踏まえた来週の作り方の方針を1〜2行）"""
+    tools = [{"type": cfg["ai"]["web_search_tool"], "name": "web_search",
+              "max_uses": cfg["ai"]["max_searches"],
+              "user_location": {"type": "approximate", "city": "Mishima", "region": "Shizuoka",
+                                "country": "JP", "timezone": "Asia/Tokyo"}}]
+    text = call_claude(prompt, cfg["ai"]["model"], tools, max_tokens=6000)
+    m = re.search(r"テーマ[:：]\s*(.+)", text)
+    theme = m.group(1).strip() if m else "季節のからだケア"
+    notes = text[text.find("メモ"):] if "メモ" in text else text[-3000:]
+    return theme, notes.strip()
+
+
+def build_channel_prompt(cfg, ch, slots, theme, notes):
+    """ステップ2: 媒体ごとに投稿を書く"""
+    slot_lines = "\n".join(
+        f'- id={c}-{d:%m%d}-{t.replace(":","")} / {d:%m月%d日}({"月火水木金土日"[d.weekday()]}) {t}'
+        for c, d, t in slots)
+    return f"""あなたは「{cfg['clinic']['name']}」の集客担当です。{ch} 用の投稿を、下の投稿枠の数だけ作ってください。
+枠ごとに切り口（悩み・季節・からだの仕組み・セルフケア・来院のきっかけ）を変え、同じ内容を繰り返さない。
+
+{clinic_block(cfg)}
+
+## 来週のテーマ
+{theme}
+
+## 調べた最新情報（使えるものだけ自然に活かす）
+{notes}
+
+## 書き方
+{CHANNEL_GUIDE[ch]}
+
+{rules_block()}
+
+## 投稿枠
 {slot_lines}
 
-## 媒体ごとの書き方
-{guides}
-
-## 法規ルール（あはき・柔整広告ガイドライン、薬機法、景品表示法）— 厳守
-- 効果を断定しない（「〜が楽になる方が多い」「〜を目指す」「〜をサポート」など）
-- 最上級・他院比較・保証・体験談・ビフォーアフター・病名・「治療/患者/診療」の語は使わない
-- 料金や割引は書かない（クーポンは予約ページで確認、と誘導する）
-- 下記の語は全媒体で使用禁止:
-{compliance.rules_as_prompt('instagram')}
-- hpb_blog だけは、さらに次の語も使用禁止（鍼灸は「東洋の叡智」と言い換える）:
-{compliance.rules_as_prompt('hpb_blog', hpb_only=True)}
-
-## 出力形式
-最後に、次のJSONだけを ```json で囲んで出力する。
-{{"week_theme": "週のテーマ", "research_notes": "調べて使った最新情報の要約（出典URLつき）",
- "items": [{{"id": "枠のid", "channel": "...", "topic": "テーマ一言", "title": "hpb_blogのみ",
-   "text": "投稿本文", "headline": "画像見出し(instagram/gbp)", "sub": "画像サブ", "tag": "画像タグ"}}]}}
-"""
+## 出力
+次のJSONだけを出力する（前置き・説明・コードブロック記号は不要）。
+{{"items": [{{"id": "枠のid", "topic": "テーマ一言", "title": "hpb_blogのみ。他は空文字",
+  "text": "投稿本文", "headline": "画像見出し（instagram/gbpのみ）", "sub": "画像サブ", "tag": "画像タグ"}}]}}"""
 
 
 def call_claude(prompt, model, tools=None, max_tokens=16000):
@@ -126,20 +159,42 @@ def call_claude(prompt, model, tools=None, max_tokens=16000):
     msgs = [{"role": "user", "content": prompt}]
     kw = {"tools": tools} if tools else {}
     text = ""
-    for _ in range(4):  # 長い応答・検索の一時停止に対応
+    for _ in range(6):  # 検索の一時停止・長い応答の続きに対応
         r = client.messages.create(model=model, max_tokens=max_tokens, messages=msgs, **kw)
         text += "".join(b.text for b in r.content if getattr(b, "type", "") == "text")
-        if r.stop_reason == "pause_turn":
-            msgs = [msgs[0], {"role": "assistant", "content": r.content}]
+        print(f"[claude] stop_reason={r.stop_reason} usage={getattr(r, 'usage', '')}")
+        if r.stop_reason in ("pause_turn", "max_tokens"):
+            msgs = msgs + [{"role": "assistant", "content": r.content}]
+            if r.stop_reason == "max_tokens":
+                msgs.append({"role": "user", "content": "続きをそのまま出力してください。"})
             continue
         break
     return text
 
 
 def parse_json(text):
-    m = re.search(r"```json\s*(\{.*\})\s*```", text, re.S)
+    m = re.search(r"```(?:json)?\s*(\{.*\})\s*```", text, re.S)
     raw = m.group(1) if m else text[text.find("{"): text.rfind("}") + 1]
-    return json.loads(raw)
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError:
+        print("---- 読み取れなかった返答（先頭/末尾） ----")
+        print(text[:1500]); print("....."); print(text[-1500:])
+        raise
+
+
+def write_channel(cfg, ch, slots, theme, notes):
+    """媒体ごとに生成。読み取りに失敗したら最大3回までやり直す"""
+    last = None
+    for attempt in range(3):
+        try:
+            text = call_claude(build_channel_prompt(cfg, ch, slots, theme, notes),
+                               cfg["ai"]["model"], max_tokens=12000)
+            return parse_json(text).get("items", [])
+        except Exception as e:
+            last = e
+            print(f"[{ch}] {attempt+1}回目失敗: {e}")
+    raise RuntimeError(f"{ch} の生成に3回失敗しました: {last}")
 
 
 def ai_fix(cfg, item, issues):
@@ -181,21 +236,33 @@ def main():
     if DRY_RUN and not os.environ.get("ANTHROPIC_API_KEY"):
         plan = mock_plan(slots)
     else:
-        tools = [{"type": cfg["ai"]["web_search_tool"], "name": "web_search",
-                  "max_uses": cfg["ai"]["max_searches"],
-                  "user_location": {"type": "approximate", "city": "Mishima", "region": "Shizuoka",
-                                    "country": "JP", "timezone": "Asia/Tokyo"}}]
-        plan = parse_json(call_claude(build_prompt(cfg, slots), cfg["ai"]["model"], tools))
+        theme, notes = research(cfg, start)
+        print("テーマ:", theme)
+        items_all, errors = [], []
+        for ch in dict.fromkeys(c for c, _, _ in slots):
+            try:
+                got = write_channel(cfg, ch, [s for s in slots if s[0] == ch], theme, notes)
+                items_all += [dict(it, channel=ch) for it in got]
+            except Exception as e:
+                errors.append(str(e))
+        if errors:
+            notify("一部の媒体の投稿を作れませんでした", "\n".join(errors))
+        plan = {"week_theme": theme, "research_notes": notes, "items": items_all}
 
-    by_id = {it["id"]: it for it in plan["items"]}
+    by_id = {it.get("id"): it for it in plan["items"]}
+    used = set()
     items, held = [], []
     for ch, d, t in slots:
         sid = f"{ch}-{d:%m%d}-{t.replace(':','')}"
-        it = by_id.get(sid) or next((x for x in plan["items"] if x["channel"] == ch and x["id"] not in
-                                     [i["id"] for i in items]), None)
+        it = by_id.get(sid) if id(by_id.get(sid)) not in used else None
+        if it is None:  # idがずれていても、同じ媒体の未使用の投稿を順に割り当てる
+            it = next((x for x in plan["items"] if x["channel"] == ch and id(x) not in used), None)
         if not it:
             continue
+        used.add(id(it))
         it = dict(it, id=sid, channel=ch)
+        if not it.get("text"):
+            continue
         hh, mm = map(int, t.split(":"))
         it["scheduled_at"] = dt.datetime(d.year, d.month, d.day, hh, mm,
                                          tzinfo=now().tzinfo).isoformat()
