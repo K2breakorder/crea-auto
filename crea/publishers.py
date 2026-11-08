@@ -27,11 +27,24 @@ def _check(r):
 
 
 # ---------------- Instagram（統合ログイン／システムユーザートークン） ----------------
+def ig_user_id(tok):
+    """IG_USER_ID が未登録なら、トークンの許可情報からInstagramアカウントIDを自動で取り出す"""
+    if os.environ.get("IG_USER_ID"):
+        return os.environ["IG_USER_ID"]
+    d = _check(requests.get(f"https://{IG_HOST}/{IG_VER}/debug_token", timeout=T,
+                            params={"input_token": tok, "access_token": tok})).get("data", {})
+    for sc in d.get("granular_scopes", []):
+        if sc.get("scope") in ("instagram_content_publish", "instagram_basic") and sc.get("target_ids"):
+            return sc["target_ids"][0]
+    raise MissingConfig("InstagramアカウントIDを特定できません（IG_USER_ID を登録してください）")
+
+
 def post_instagram(item):
     url = image_public_url(item["image"])
     if DRY_RUN:
         return {"dry_run": True, "image_url": url}
-    ig, tok = _env("IG_USER_ID"), _env("IG_ACCESS_TOKEN")
+    tok = _env("IG_ACCESS_TOKEN")
+    ig = ig_user_id(tok)
     base = f"https://{IG_HOST}/{IG_VER}"
     c = _check(requests.post(f"{base}/{ig}/media", timeout=T,
                              data={"image_url": url, "caption": item["text"], "access_token": tok}))
@@ -53,7 +66,8 @@ def post_instagram(item):
 def post_threads(item):
     if DRY_RUN:
         return {"dry_run": True}
-    uid, tok = _env("THREADS_USER_ID"), _env("THREADS_ACCESS_TOKEN")
+    tok = _env("THREADS_ACCESS_TOKEN")
+    uid = os.environ.get("THREADS_USER_ID") or "me"  # IDが未登録でも「me」で本人として投稿できる
     base = "https://graph.threads.net/v1.0"
     c = _check(requests.post(f"{base}/{uid}/threads", timeout=T,
                              data={"media_type": "TEXT", "text": item["text"], "access_token": tok}))
