@@ -1,0 +1,38 @@
+name: 予約投稿
+on:
+  schedule:
+    - cron: "*/30 * * * *"  # 30分ごとに予約時刻を過ぎた投稿を出す
+  workflow_dispatch:
+permissions: { contents: write }
+concurrency: { group: crea-data, cancel-in-progress: false }
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      IG_USER_ID: ${{ secrets.IG_USER_ID }}
+      IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+      THREADS_USER_ID: ${{ secrets.THREADS_USER_ID }}
+      THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
+      GBP_CLIENT_ID: ${{ secrets.GBP_CLIENT_ID }}
+      GBP_CLIENT_SECRET: ${{ secrets.GBP_CLIENT_SECRET }}
+      GBP_REFRESH_TOKEN: ${{ secrets.GBP_REFRESH_TOKEN }}
+      GBP_ACCOUNT_ID: ${{ secrets.GBP_ACCOUNT_ID }}
+      GBP_LOCATION_ID: ${{ secrets.GBP_LOCATION_ID }}
+      LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+      GMAIL_USER: ${{ secrets.GMAIL_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      NOTIFY_EMAIL: ${{ secrets.NOTIFY_EMAIL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -r requirements.txt
+      - run: python -m crea.publish
+      - name: 結果を保存
+        run: |
+          git config user.name "crea-bot"
+          git config user.email "crea-bot@users.noreply.github.com"
+          git add data
+          git diff --cached --quiet || git commit -m "auto: $GITHUB_WORKFLOW $(date +%F_%H%M)"
+          git pull --rebase && git push
