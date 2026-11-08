@@ -4,6 +4,7 @@ import os, requests
 from .common import DATA, DRY_RUN, all_queue_items, save_json, notify
 
 IG_VER = os.environ.get("IG_API_VERSION", "v23.0")
+IG_HOST = os.environ.get("IG_API_HOST") or "graph.facebook.com"
 
 
 def _get(url, params):
@@ -15,9 +16,9 @@ def _get(url, params):
 
 
 def ig_metrics(mid, tok):
-    d = _get(f"https://graph.instagram.com/{IG_VER}/{mid}",
+    d = _get(f"https://{IG_HOST}/{IG_VER}/{mid}",
              {"fields": "like_count,comments_count", "access_token": tok})
-    ins = _get(f"https://graph.instagram.com/{IG_VER}/{mid}/insights",
+    ins = _get(f"https://{IG_HOST}/{IG_VER}/{mid}/insights",
                {"metric": "reach,saved,shares", "access_token": tok})
     m = {"likes": d.get("like_count", 0), "comments": d.get("comments_count", 0)}
     for x in ins.get("data", []):
