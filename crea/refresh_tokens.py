@@ -4,7 +4,7 @@ import os, subprocess, requests
 from .common import notify, DRY_RUN
 
 TARGETS = [
-    ("IG_ACCESS_TOKEN", "https://graph.instagram.com/refresh_access_token", "ig_refresh_token"),
+    # Instagramは統合ログインのシステムユーザートークン（無期限）なので更新不要
     ("THREADS_ACCESS_TOKEN", "https://graph.threads.net/refresh_access_token", "th_refresh_token"),
 ]
 
