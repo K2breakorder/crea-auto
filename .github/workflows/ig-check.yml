@@ -6,6 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+      IG_USER_ID: ${{ secrets.IG_USER_ID }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
