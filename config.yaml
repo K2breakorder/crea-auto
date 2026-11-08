@@ -27,12 +27,21 @@ clinic:
   line_benefit: "LINE限定：カウンセリング長め＋ドリンクサービス"
   theme_color: "brown"
 
+# 目標と戦略（毎週の投稿づくりでAIが必ず参照する）
+strategy:
+  goal: "三島市で『鍼灸・整体を探す人に最初に選ばれる院』になる（Googleマップ上位・口コミ評価と数・HPB予約数で地域トップ）"
+  local_keywords: ["三島", "三島市", "三島駅", "三島駅南口", "長泉", "清水町", "沼津", "裾野", "伊豆の国"]
+  search_phrases: ["三島 鍼灸", "三島 整体", "三島駅 整体", "三島 肩こり", "三島 腰痛", "三島 美容鍼", "三島 マッサージ", "三島 不調 相談"]
+  strengths: ["東洋医学・西洋医学の両方の国家資格", "業界歴35年", "完全予約制・1対1", "三島駅南口 徒歩3分", "病院や他院で原因がわからなかった不調に全身から向き合う"]
+  review_ask_ratio: 0.2      # 投稿の約2割で、来院された方へGoogle口コミのお願いを自然に入れる（特典との引き換えは禁止）
+  competitor_watch: true     # 毎週、三島の上位院の動き（口コミ数・発信テーマ）を調べて差別化に使う
+
 # 使うAI（Claude API）
 ai:
   model: "claude-sonnet-5-5"        # 文章を作るモデル
   review_model: "claude-sonnet-5-5" # 法規チェックをするモデル
   web_search_tool: "web_search_20250305"
-  max_searches: 6                   # 1回の生成で調べる最大回数（1回 約1.5円）
+  max_searches: 8                   # 1回の生成で調べる最大回数（1回 約1.5円）
 
 # 媒体ごとのON/OFFと頻度（曜日: mon tue wed thu fri sat sun / 時刻は日本時間）
 channels:
@@ -46,7 +55,7 @@ channels:
             {day: sun, time: "20:30"}]
   gbp:            # Googleマップ（Googleビジネスプロフィール）
     enabled: true
-    slots: [{day: tue, time: "10:00"}, {day: sat, time: "9:00"}]
+    slots: [{day: tue, time: "10:00"}, {day: thu, time: "10:00"}, {day: sat, time: "9:00"}]  # MEO重視で週3本
   hpb_blog:       # ホットペッパーはAPIがないため、完成原稿をメールで届ける（貼り付け1分）
     enabled: true
     slots: [{day: mon, time: "8:00"}, {day: thu, time: "8:00"}]
