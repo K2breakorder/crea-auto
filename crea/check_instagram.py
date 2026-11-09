@@ -35,7 +35,7 @@ gacc, gloc = os.environ.get("GBP_ACCOUNT_ID", ""), os.environ.get("GBP_LOCATION_
 if gid and gsec and grt:
     r = requests.post("https://oauth2.googleapis.com/token", timeout=30, data={
         "client_id": gid, "client_secret": gsec, "refresh_token": grt, "grant_type": "refresh_token"})
-    print(f"\n== Google ログイン: HTTP {r.status_code}\n" + (r.json().get("error_description", "OK") if r.headers.get("content-type", "").startswith("application/json") else r.text[:200]))
+    print(f"\n== Google ログイン: HTTP {r.status_code}\n" + (str({k: v for k, v in r.json().items() if k in ("error", "error_description")}) or "OK") if r.headers.get("content-type", "").startswith("application/json") else r.text[:200]))
     if r.ok:
         at = r.json()["access_token"]
         h = {"Authorization": f"Bearer {at}"}
