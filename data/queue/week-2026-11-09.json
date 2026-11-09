@@ -14,7 +14,11 @@
       "channel": "hpb_blog",
       "scheduled_at": "2026-11-09T08:00:00+09:00",
       "compliance": [],
-      "status": "pending"
+      "status": "posted",
+      "posted_at": "2026-11-09T11:14:16.799302+09:00",
+      "result": {
+        "emailed": true
+      }
     },
     {
       "id": "instagram-1109-1210",
