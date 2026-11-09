@@ -39,6 +39,30 @@ def ig_user_id(tok):
     raise MissingConfig("InstagramアカウントIDを特定できません（IG_USER_ID を登録してください）")
 
 
+def ig_location_id(tok, ig):
+    """場所タグ用のID。IG_LOCATION_ID があればそれを使い、なければ
+    Instagramとつながっている住所つきFacebookページのIDを自動で探す。見つからなければ None。"""
+    v = os.environ.get("IG_LOCATION_ID")
+    if not v:
+        try:
+            from .common import config
+            v = str((config().get("clinic") or {}).get("ig_location_id") or "")
+        except Exception:
+            v = ""
+    if v:
+        return v
+    try:
+        r = requests.get(f"https://{IG_HOST}/{IG_VER}/me/accounts", timeout=T, params={
+            "fields": "id,name,location,instagram_business_account", "access_token": tok})
+        for pg in (r.json().get("data") or []):
+            if (pg.get("instagram_business_account") or {}).get("id") == str(ig) and pg.get("location"):
+                return pg["id"]
+        print("場所タグ用のページが見つかりませんでした:", r.text[:300])
+    except Exception as e:
+        print("場所タグの確認に失敗:", e)
+    return None
+
+
 def post_instagram(item):
     url = image_public_url(item["image"])
     if DRY_RUN:
@@ -46,8 +70,16 @@ def post_instagram(item):
     tok = _env("IG_ACCESS_TOKEN")
     ig = ig_user_id(tok)
     base = f"https://{IG_HOST}/{IG_VER}"
-    c = _check(requests.post(f"{base}/{ig}/media", timeout=T,
-                             data={"image_url": url, "caption": item["text"], "access_token": tok}))
+    data = {"image_url": url, "caption": item["text"], "access_token": tok}
+    loc = ig_location_id(tok, ig)
+    if loc:
+        data["location_id"] = loc  # 投稿に「Crea athlete & beauty care」の場所タグを付ける
+    r = requests.post(f"{base}/{ig}/media", timeout=T, data=data)
+    if not r.ok and loc:
+        print("場所タグ付きで失敗したため、場所タグなしで再試行:", r.text[:300])
+        data.pop("location_id")
+        r = requests.post(f"{base}/{ig}/media", timeout=T, data=data)
+    c = _check(r)
     cid = c["id"]
     for _ in range(12):  # 画像の取り込み完了を待つ
         s = _check(requests.get(f"{base}/{cid}", timeout=T,
