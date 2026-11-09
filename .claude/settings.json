@@ -1,0 +1,63 @@
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Write(posts/**)",
+      "Edit(posts/**)",
+      "Edit(knowledge/learnings.md)",
+      "Edit(knowledge/latest-check-log.md)",
+      "WebSearch",
+      "WebFetch",
+      "Bash(git status)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(python3 .claude/hooks/*)"
+    ],
+    "ask": [
+      "Bash(git push:*)",
+      "Bash(python -m crea.generate:*)",
+      "Bash(python -m crea.publish:*)",
+      "Edit(CLAUDE.md)",
+      "Edit(config.yaml)",
+      "Edit(crea/**)",
+      "Edit(.github/**)",
+      "Edit(data/queue/**)",
+      "Edit(knowledge/regulations.md)",
+      "Edit(.claude/**)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(rm -rf:*)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          { "type": "command", "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/session_start.py\"" }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|Bash",
+        "hooks": [
+          { "type": "command", "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/block_secrets.py\"" }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          { "type": "command", "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/ad_check.py\"" }
+        ]
+      }
+    ]
+  }
+}
