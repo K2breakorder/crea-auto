@@ -14,6 +14,7 @@ def show(name, url, params, secret):
 
 if tok and iid:
     show("Instagram アカウント", f"https://{HOST}/{V}/{iid}", {"fields": "id,username,followers_count"}, tok)
+    show("Instagram 場所タグ用ページ", f"https://{HOST}/{V}/me/accounts", {"fields": "id,name,location,instagram_business_account"}, tok)
     show("Instagram 投稿枠", f"https://{HOST}/{V}/{iid}/content_publishing_limit", {"fields": "quota_usage,config"}, tok)
 if th:
     show("Threads アカウント", "https://graph.threads.net/v1.0/me", {"fields": "id,username"}, th)
