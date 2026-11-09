@@ -49,7 +49,11 @@
       "channel": "threads",
       "scheduled_at": "2026-11-09T20:30:00+09:00",
       "compliance": [],
-      "status": "pending"
+      "status": "posted",
+      "posted_at": "2026-11-09T20:31:18.510198+09:00",
+      "result": {
+        "media_id": "18085648601711019"
+      }
     },
     {
       "id": "gbp-1110-1000",
