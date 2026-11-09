@@ -2,11 +2,24 @@
 
 実行: python -m crea.publish
 """
-import datetime as dt, traceback
+import datetime as dt, traceback, re
 from .common import config, now, all_queue_items, save_json, notify
 from . import compliance, publishers as P
 
 GRACE_HOURS = 12  # 予約時刻から12時間以上遅れたものは出さない（古い話題を防ぐ）
+
+
+def clean_text(t):
+    """店舗情報から電話番号の行と、LINEの後ろの特典カッコ書きを取り除く"""
+    t = re.sub(r"^.*(TEL|電話|☎)[^\n]*\d{2,4}-\d{2,4}-\d{3,4}.*\n?", "", t, flags=re.M)
+    t = re.sub(r"\d{2,4}-\d{3,4}-\d{4}", "", t)
+    t = re.sub(r"(LINE)\s*[（(][^）)\n]*(カウンセリング|ドリンク|特典)[^）)\n]*[）)]", r"\1", t)
+    t = re.sub(r"(LINE)\s*[：:][^\n]*ドリンクサービス[^\n]*", r"\1", t)
+    # 特典の文（カウンセリング長め・ドリンクサービス）を文ごと取り除く
+    t = re.sub(r"^[^\n。]*ドリンクサービス[^\n。]*$\n?", "", t, flags=re.M)
+    t = re.sub(r"[^。\n]*ドリンクサービス[^。\n]*。", "", t)
+    t = re.sub(r"\n{3,}", "\n\n", t)
+    return t
 
 
 def main():
@@ -30,6 +43,7 @@ def main():
                 it["status"] = "expired"; changed = True; continue
             if done_today >= cfg["safety"]["max_posts_per_day"]:
                 break
+            it["text"] = clean_text(it["text"])
             # 投稿直前にもう一度NGチェック（手で直した場合も安全に）
             full = (it.get("title", "") + "\n" + it["text"]) if it["channel"] == "hpb_blog" else it["text"]
             ng = compliance.check(full, it["channel"])
