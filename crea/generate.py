@@ -22,7 +22,7 @@ CHANNEL_GUIDE = {
                 "HPBでは『鍼・灸・医学・病院・医療・あん摩・マッサージ指圧』は使えない。鍼灸は『東洋の叡智』と表現する。"
                 "最後にクーポン予約への自然な誘導。",
     "line_broadcast": "LINE一斉配信。250字以内。ブロックされないよう、売り込みより『役立つ・ちょっと嬉しい』を優先。"
-                      "季節の気づき＋LINE限定特典（カウンセリング長め＋ドリンクサービス）＋予約導線（HPBかLINEで返信）。",
+                      "季節の気づき＋予約導線（HPBかLINEで返信）。",
 }
 
 
@@ -72,10 +72,11 @@ def clinic_block(cfg):
 - コンセプト: {c['concept']}
 - ターゲット: {c['target']}
 - 住所: {c['address']}（{c['access']}）／駐車場: {c['parking']}
-- 営業: {c['hours']}／電話: {c['phone']}／支払い: {c['payment']}
+- 営業: {c['hours']}／支払い: {c['payment']}
 - 施術者: {c['qualifications']}
 - メニュー: {' / '.join(c['menus'])}
-- LINE: {c['line_url']}（{c['line_benefit']}）
+- LINE: {c['line_url']}
+- 投稿の店舗情報には電話番号を書かない。LINEはURLだけを書き、後ろにカッコ書きの特典説明は付けない。LINE特典（カウンセリング長め・ドリンクサービス）にはどの投稿でも触れない
 - 予約: ホットペッパービューティー {c['hotpepper']} ／ 公式サイト {c['website']}"""
 
 
