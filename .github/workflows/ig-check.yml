@@ -9,6 +9,11 @@ jobs:
       IG_USER_ID: ${{ secrets.IG_USER_ID }}
       THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
       LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+      GBP_CLIENT_ID: ${{ secrets.GBP_CLIENT_ID }}
+      GBP_CLIENT_SECRET: ${{ secrets.GBP_CLIENT_SECRET }}
+      GBP_REFRESH_TOKEN: ${{ secrets.GBP_REFRESH_TOKEN }}
+      GBP_ACCOUNT_ID: ${{ secrets.GBP_ACCOUNT_ID }}
+      GBP_LOCATION_ID: ${{ secrets.GBP_LOCATION_ID }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
