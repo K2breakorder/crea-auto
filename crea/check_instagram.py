@@ -28,3 +28,20 @@ if line:
                       ("LINE 友だち数", f"https://api.line.me/v2/bot/insight/followers?date={day}")]:
         r = requests.get(url, headers=h, timeout=30)
         print(f"\n== {name}: HTTP {r.status_code}\n" + r.text.replace(line, "***")[:400])
+
+# Googleビジネスプロフィール（読み取りのみ。投稿はしない）
+gid, gsec, grt = os.environ.get("GBP_CLIENT_ID", ""), os.environ.get("GBP_CLIENT_SECRET", ""), os.environ.get("GBP_REFRESH_TOKEN", "")
+gacc, gloc = os.environ.get("GBP_ACCOUNT_ID", ""), os.environ.get("GBP_LOCATION_ID", "")
+if gid and gsec and grt:
+    r = requests.post("https://oauth2.googleapis.com/token", timeout=30, data={
+        "client_id": gid, "client_secret": gsec, "refresh_token": grt, "grant_type": "refresh_token"})
+    print(f"\n== Google ログイン: HTTP {r.status_code}\n" + (r.json().get("error_description", "OK") if r.headers.get("content-type", "").startswith("application/json") else r.text[:200]))
+    if r.ok:
+        at = r.json()["access_token"]
+        h = {"Authorization": f"Bearer {at}"}
+        for name, url in [("Google 店舗情報", f"https://mybusinessbusinessinformation.googleapis.com/v1/locations/{gloc}?readMask=name,title"),
+                          ("Google 投稿一覧（最新1件）", f"https://mybusiness.googleapis.com/v4/accounts/{gacc}/locations/{gloc}/localPosts?pageSize=1")]:
+            x = requests.get(url, headers=h, timeout=30)
+            print(f"\n== {name}: HTTP {x.status_code}\n" + x.text.replace(at, "***")[:500])
+else:
+    print("\n== Google: 未登録の項目があります", {"CLIENT_ID": bool(gid), "SECRET": bool(gsec), "REFRESH_TOKEN": bool(grt)})
