@@ -33,6 +33,7 @@ if line:
 gid, gsec, grt = os.environ.get("GBP_CLIENT_ID", ""), os.environ.get("GBP_CLIENT_SECRET", ""), os.environ.get("GBP_REFRESH_TOKEN", "")
 gacc, gloc = os.environ.get("GBP_ACCOUNT_ID", ""), os.environ.get("GBP_LOCATION_ID", "")
 if gid and gsec and grt:
+    print("\n== Google 登録値の形式:", {"id_ok": gid.endswith(".apps.googleusercontent.com"), "secret_head": gsec[:7], "secret_len": len(gsec), "token_head": grt[:4], "token_len": len(grt), "空白や引用符": any(c in gsec + grt for c in " \t\n\"'")})
     r = requests.post("https://oauth2.googleapis.com/token", timeout=30, data={
         "client_id": gid, "client_secret": gsec, "refresh_token": grt, "grant_type": "refresh_token"})
     print(f"\n== Google ログイン: HTTP {r.status_code}\n" + (str({k: v for k, v in r.json().items() if k in ("error", "error_description")}) if r.headers.get("content-type", "").startswith("application/json") else r.text[:200]))
