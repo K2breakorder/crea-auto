@@ -24,6 +24,7 @@
 | `/crea-sns-post` | Instagram・Threads（instagram-agent-ja と併用） |
 | `/crea-line-message` | LINE配信文 |
 | `/crea-ad-review` | 7項目の広告チェックと言い換え |
+| `/x-team-setup` | X運用AIチーム（スカウト・スミス・リンカー）を `prompts/x_team_setup.xml` に沿って段階的に構築 |
 
 ## 必要なもの
 Claude Code と python3（フックが `crea/compliance.py` を読み込みます。追加のインストールは不要）。
