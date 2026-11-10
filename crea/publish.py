@@ -58,7 +58,7 @@ def main():
                 elif ch == "threads":
                     res = P.post_threads(it)
                 elif ch == "gbp":
-                    res = P.post_gbp(it, cfg["clinic"]["hotpepper"])
+                    res = P.post_gbp(it, cfg["clinic"]["line_url"])  # 予約ボタンはLINEへ
                 elif ch == "line_broadcast":
                     res = P.post_line_broadcast(it)
                 elif ch == "hpb_blog":
