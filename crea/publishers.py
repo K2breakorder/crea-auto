@@ -156,3 +156,11 @@ def post_hpb_blog(item, hpb_admin="https://salonboard.com/login/"):
            "SALON BOARD → 掲載管理 → ブログ に貼り付けて投稿してください（約1分）。\n"
            f"{hpb_admin}\n\n■タイトル\n{item.get('title','')}\n\n■本文\n{item['text']}\n")
     return {"emailed": True}
+
+
+# ---------------- アメブロ（メール投稿が終了 → 完成原稿をメールで届ける） ----------------
+def post_ameblo(item, admin="https://blog.ameba.jp/ucs/entry/srventryinsertinput.do"):
+    notify(f"アメブロ原稿：{item.get('title','')}",
+           "アメブロの「ブログを書く」に、タイトルと本文を貼り付けて投稿してください（約2分）。\n"
+           f"{admin}\n\n■タイトル\n{item.get('title','')}\n\n■本文\n{item['text']}\n")
+    return {"emailed": True}

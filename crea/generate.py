@@ -21,6 +21,10 @@ CHANNEL_GUIDE = {
     "hpb_blog": "ホットペッパービューティーのブログ。タイトル(title 30字以内)と本文1000〜1500字。"
                 "HPBでは『鍼・灸・医学・病院・医療・あん摩・マッサージ指圧』は使えない。鍼灸は『東洋の叡智』と表現する。"
                 "最後にクーポン予約への自然な誘導。",
+    "ameblo": "アメーバブログ（アメブロ）の記事。同じ週のホットペッパーブログと同じテーマで書く。タイトル(title 32字以内)と本文1500〜2000字。"
+              "タイトルと冒頭に『三島 鍼灸』『三島 整体』『三島駅』など検索される言葉を自然に入れる。"
+              "アメブロでは『鍼灸』『美容鍼』『あん摩マッサージ指圧師』などの言葉をそのまま使ってよい（あはき・柔整広告ガイドラインと薬機法は守る）。"
+              "■で小見出しを3〜4個。最後にホットペッパーのURLとLINEのURLを両方載せる。",
     "line_broadcast": "LINE一斉配信。250字以内。ブロックされないよう、売り込みより『役立つ・ちょっと嬉しい』を優先。"
                       "季節の気づき＋予約導線（HPBかLINEで返信）。",
 }
@@ -169,7 +173,7 @@ def build_channel_prompt(cfg, ch, slots, theme, notes):
 
 ## 出力
 次のJSONだけを出力する（前置き・説明・コードブロック記号は不要）。
-{{"items": [{{"id": "枠のid", "topic": "テーマ一言", "title": "hpb_blogのみ。他は空文字",
+{{"items": [{{"id": "枠のid", "topic": "テーマ一言", "title": "hpb_blogとamebloのみ。他は空文字",
   "text": "投稿本文", "headline": "画像見出し（instagram/gbpのみ）", "sub": "画像サブ", "tag": "画像タグ"}}]}}"""
 
 
@@ -286,11 +290,11 @@ def main():
         hh, mm = map(int, t.split(":"))
         it["scheduled_at"] = dt.datetime(d.year, d.month, d.day, hh, mm,
                                          tzinfo=now().tzinfo).isoformat()
-        full = (it.get("title", "") + "\n" + it["text"]) if ch == "hpb_blog" else it["text"]
+        full = (it.get("title", "") + "\n" + it["text"]) if ch in ("hpb_blog", "ameblo") else it["text"]
         issues = compliance.check(full, ch)
         if issues and not (DRY_RUN and not os.environ.get("ANTHROPIC_API_KEY")):
             it["text"] = ai_fix(cfg, it, issues)
-            full = (it.get("title", "") + "\n" + it["text"]) if ch == "hpb_blog" else it["text"]
+            full = (it.get("title", "") + "\n" + it["text"]) if ch in ("hpb_blog", "ameblo") else it["text"]
             issues = compliance.check(full, ch)
         it["compliance"] = issues
         it["status"] = "held" if (issues and cfg["safety"]["hold_on_any_ng"]) else "pending"

@@ -28,7 +28,7 @@ HPB_NG = {
                   r"整骨", r"接骨", r"施術所", r"症状"],
 }
 
-LIMITS = {"threads": 500, "instagram": 2200, "gbp": 1500, "line_broadcast": 5000, "hpb_blog": 10000}
+LIMITS = {"threads": 500, "instagram": 2200, "gbp": 1500, "line_broadcast": 5000, "hpb_blog": 10000, "ameblo": 30000}
 
 
 def check(text: str, channel: str) -> list[dict]:

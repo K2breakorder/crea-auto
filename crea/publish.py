@@ -45,7 +45,7 @@ def main():
                 break
             it["text"] = clean_text(it["text"])
             # 投稿直前にもう一度NGチェック（手で直した場合も安全に）
-            full = (it.get("title", "") + "\n" + it["text"]) if it["channel"] == "hpb_blog" else it["text"]
+            full = (it.get("title", "") + "\n" + it["text"]) if it["channel"] in ("hpb_blog", "ameblo") else it["text"]
             ng = compliance.check(full, it["channel"])
             if ng and cfg["safety"]["hold_on_any_ng"]:
                 it["status"] = "held"; it["compliance"] = ng; changed = True
@@ -63,6 +63,8 @@ def main():
                     res = P.post_line_broadcast(it)
                 elif ch == "hpb_blog":
                     res = P.post_hpb_blog(it)
+                elif ch == "ameblo":
+                    res = P.post_ameblo(it)
                 else:
                     continue
                 it.update(status="posted", posted_at=now().isoformat(), result=res)
