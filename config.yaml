@@ -51,9 +51,9 @@ channels:
     slots: [{day: mon, time: "12:10"}, {day: wed, time: "12:10"}, {day: fri, time: "19:30"}]
   threads:
     enabled: true
-    slots: [{day: mon, time: "20:30"}, {day: tue, time: "20:30"}, {day: wed, time: "20:30"},
-            {day: thu, time: "20:30"}, {day: fri, time: "7:30"}, {day: sat, time: "8:30"},
-            {day: sun, time: "20:30"}]
+    slots: [{day: mon, time: "8:30"}, {day: tue, time: "8:30"}, {day: wed, time: "8:30"},
+            {day: thu, time: "8:30"}, {day: fri, time: "8:30"}, {day: sat, time: "8:30"},
+            {day: sun, time: "8:30"}]   # 毎朝8:30
   gbp:            # Googleマップ（Googleビジネスプロフィール）
     enabled: true
     slots: [{day: tue, time: "10:00"}, {day: thu, time: "10:00"}, {day: sat, time: "9:00"}]  # MEO重視で週3本
