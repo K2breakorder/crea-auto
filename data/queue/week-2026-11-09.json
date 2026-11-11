@@ -119,7 +119,11 @@
       "channel": "threads",
       "scheduled_at": "2026-11-11T20:30:00+09:00",
       "compliance": [],
-      "status": "pending"
+      "status": "posted",
+      "posted_at": "2026-11-11T20:31:18.000899+09:00",
+      "result": {
+        "media_id": "18099149192540180"
+      }
     },
     {
       "id": "hpb_blog-1112-800",
