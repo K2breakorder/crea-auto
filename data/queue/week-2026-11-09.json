@@ -187,8 +187,12 @@
       "tag": "三島駅南口徒歩3分",
       "scheduled_at": "2026-11-12T12:40:00+09:00",
       "compliance": [],
-      "status": "pending",
-      "image": "gbp-1112-1240-2026.jpg"
+      "status": "posted",
+      "image": "gbp-1112-1240-2026.jpg",
+      "posted_at": "2026-11-12T13:00:48.810521+09:00",
+      "result": {
+        "post_name": "accounts/118437616474757454249/locations/10811346000007817870/localPosts/8040961536168758675"
+      }
     },
     {
       "id": "threads-1113-830",
