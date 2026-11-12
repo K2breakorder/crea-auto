@@ -205,7 +205,11 @@
       "channel": "threads",
       "scheduled_at": "2026-11-13T08:30:00+09:00",
       "compliance": [],
-      "status": "pending"
+      "status": "posted",
+      "posted_at": "2026-11-13T08:31:16.916858+09:00",
+      "result": {
+        "media_id": "18168115468489482"
+      }
     },
     {
       "id": "instagram-1113-1930",
