@@ -48,7 +48,7 @@ ai:
 channels:
   instagram:
     enabled: true
-    slots: [{day: mon, time: "12:10"}, {day: wed, time: "12:10"}, {day: fri, time: "19:30"}]
+    slots: [{day: mon, time: "9:00"}, {day: wed, time: "9:00"}, {day: fri, time: "9:00"}]   # 毎回朝9:00
   threads:
     enabled: true
     slots: [{day: mon, time: "8:30"}, {day: tue, time: "8:30"}, {day: wed, time: "8:30"},
