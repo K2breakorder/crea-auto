@@ -241,7 +241,11 @@
       "image": "instagram-1113-1930-2026.jpg",
       "scheduled_at": "2026-11-13T18:50:00+09:00",
       "compliance": [],
-      "status": "pending"
+      "status": "posted",
+      "posted_at": "2026-11-13T19:00:54.517778+09:00",
+      "result": {
+        "post_name": "accounts/118437616474757454249/locations/10811346000007817870/localPosts/1100771939608437183"
+      }
     },
     {
       "id": "threads-1114-830",
