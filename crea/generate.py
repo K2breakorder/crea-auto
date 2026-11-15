@@ -3,12 +3,13 @@
 実行: python -m crea.generate
 """
 import json, os, re, datetime as dt
-from . import compliance
+from . import compliance, lint as L
 from .common import (DATA, QUEUE, DRY_RUN, config, now, load_json, save_json,
-                     all_queue_items, notify)
+                     all_queue_items, notify, clean_text, knowledge_text, knowledge_tail)
 from .images import make_card
 
 DAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
+USAGE = {"input_tokens": 0, "output_tokens": 0, "web_searches": 0, "calls": 0}  # 今回の実行で使った量
 
 CHANNEL_GUIDE = {
     "instagram": "Instagramフィード投稿。画像用の見出し(headline 20字以内。読みやすい位置に改行\\nを1つ入れる)とサブ(sub 40字以内)、タグ(tag 8字以内)も作る。"
@@ -64,9 +65,45 @@ def performance_summary():
     if not posts:
         return "（まだ実績データなし）"
     posts.sort(key=lambda p: p["score"], reverse=True)
-    top = "\n".join(f'- 好調: [{p["channel"]}] {p.get("topic","")}（{p.get("metrics")}）' for p in posts[:5])
-    low = "\n".join(f'- 不調: [{p["channel"]}] {p.get("topic","")}（{p.get("metrics")}）' for p in posts[-3:])
-    return top + "\n" + low
+    top = "\n".join(f'- 好調: [{p["channel"]}] {p.get("hook") or ""} {p.get("topic","")}「{p.get("first_line","")}」（{p.get("metrics")}）' for p in posts[:5])
+    low = "\n".join(f'- 不調: [{p["channel"]}] {p.get("hook") or ""} {p.get("topic","")}「{p.get("first_line","")}」（{p.get("metrics")}）' for p in posts[-3:])
+    return top + "\n" + low + hook_stats_text(posts)
+
+
+def hook_stats(posts):
+    """冒頭フックの型ごとの成績 {(媒体, 型): (件数, 平均スコア)}"""
+    agg = {}
+    for p in posts:
+        if p.get("hook") and p.get("score") is not None:
+            agg.setdefault((p["channel"], p["hook"]), []).append(p["score"])
+    return {k: (len(v), round(sum(v) / len(v), 1)) for k, v in agg.items()}
+
+
+def hook_stats_text(posts):
+    st = hook_stats(posts)
+    if not st:
+        return ""
+    rows = sorted(st.items(), key=lambda kv: (kv[0][0], -kv[1][1]))
+    return "\n冒頭フックの型ごとの平均スコア:\n" + "\n".join(
+        f"- [{ch}] {hk}: 平均{avg}（{n}件）" for (ch, hk), (n, avg) in rows)
+
+
+def hooks_block():
+    t = knowledge_text("hooks.md")
+    if not t:
+        return ""
+    return ("## 冒頭フックの型（1行目は必ずこのどれかで作り、使った番号を hook に入れる。"
+            "同じ媒体で同じ型を3回続けない。成績の良い型を多めに）\n" + t)
+
+
+def memo_block():
+    fb, ln = knowledge_tail("feedback.md", 20), knowledge_tail("learnings.md", 15)
+    out = ""
+    if fb:
+        out += "## オーナーからの指摘（必ず守る。同じ指摘を二度受けない）\n" + fb + "\n\n"
+    if ln:
+        out += "## これまでの学び（前回より1つ以上良くする）\n" + ln
+    return out.strip()
 
 
 def clinic_block(cfg):
@@ -166,6 +203,10 @@ def build_channel_prompt(cfg, ch, slots, theme, notes):
 ## 書き方
 {CHANNEL_GUIDE[ch]}
 
+{hooks_block()}
+
+{memo_block()}
+
 {rules_block()}
 
 ## 投稿枠
@@ -174,7 +215,8 @@ def build_channel_prompt(cfg, ch, slots, theme, notes):
 ## 出力
 次のJSONだけを出力する（前置き・説明・コードブロック記号は不要）。
 {{"items": [{{"id": "枠のid", "topic": "テーマ一言", "title": "hpb_blogとamebloのみ。他は空文字",
-  "text": "投稿本文", "headline": "画像見出し（instagram/gbpのみ）", "sub": "画像サブ", "tag": "画像タグ"}}]}}"""
+  "text": "投稿本文", "hook": "使った冒頭フックの型の番号（例 H3）",
+  "headline": "画像見出し（instagram/gbpのみ）", "sub": "画像サブ", "tag": "画像タグ"}}]}}"""
 
 
 def call_claude(prompt, model, tools=None, max_tokens=16000):
@@ -187,6 +229,7 @@ def call_claude(prompt, model, tools=None, max_tokens=16000):
         r = client.messages.create(model=model, max_tokens=max_tokens, messages=msgs, **kw)
         text += "".join(b.text for b in r.content if getattr(b, "type", "") == "text")
         print(f"[claude] stop_reason={r.stop_reason} usage={getattr(r, 'usage', '')}")
+        _count_usage(r)
         if r.stop_reason in ("pause_turn", "max_tokens"):
             msgs = msgs + [{"role": "assistant", "content": r.content}]
             if r.stop_reason == "max_tokens":
@@ -194,6 +237,28 @@ def call_claude(prompt, model, tools=None, max_tokens=16000):
             continue
         break
     return text
+
+
+def _count_usage(r):
+    u = getattr(r, "usage", None)
+    if not u:
+        return
+    USAGE["calls"] += 1
+    USAGE["input_tokens"] += (getattr(u, "input_tokens", 0) or 0)
+    USAGE["output_tokens"] += (getattr(u, "output_tokens", 0) or 0)
+    stu = getattr(u, "server_tool_use", None)
+    USAGE["web_searches"] += (getattr(stu, "web_search_requests", 0) or 0) if stu else 0
+
+
+def save_usage(kind):
+    """使った量を data/costs.json に1行足す（毎晩の集計メールで月の合計を出す）"""
+    if not USAGE["calls"]:
+        return
+    path = DATA / "costs.json"
+    costs = load_json(path, {"runs": []})
+    costs["runs"].append(dict(USAGE, date=now().date().isoformat(), kind=kind))
+    costs["runs"] = costs["runs"][-500:]
+    save_json(path, costs)
 
 
 def parse_json(text):
@@ -239,9 +304,9 @@ def mock_plan(slots):
     items = []
     for ch, d, t in slots:
         items.append({"id": f"{ch}-{d:%m%d}-{t.replace(':','')}", "channel": ch, "topic": "冬の冷えと首こり",
-                      "title": "寒くなると首がつらくなる理由", "headline": "朝、首が回らない日が増えたら",
+                      "title": f"三島の冬、首がつらくなる理由 {d:%m/%d}", "hook": "H2", "headline": "朝、首が回らない日が増えたら",
                       "sub": "冷えで固まる「首まわり」をゆるめる1分ケア", "tag": "冬のからだ",
-                      "text": "寒くなると首や肩がこわばりやすくなります。首の後ろを温めてから、ゆっくり呼吸を3回。"
+                      "text": f"（テスト {ch} {d:%m/%d}）三島も寒くなると首や肩がこわばりやすくなります。首の後ろを温めてから、ゆっくり呼吸を3回。"
                               "からだ全体から整えたい方は、三島駅南口徒歩3分のCreaへ。ご予約はホットペッパーかLINEから。"})
     return {"week_theme": "（テスト）冬の冷え", "research_notes": "テストモード", "items": items}
 
@@ -273,6 +338,8 @@ def main():
             notify("一部の媒体の投稿を作れませんでした", "\n".join(errors))
         plan = {"week_theme": theme, "research_notes": notes, "items": items_all}
 
+    history = [h for h in L.history_items() if not h.get("scheduled_at", "").startswith(tuple(
+        str(start + dt.timedelta(days=i)) for i in range(7)))]  # 作り直しの時は、同じ週の古い分と比べない
     by_id = {it.get("id"): it for it in plan["items"]}
     used = set()
     items, held = [], []
@@ -287,6 +354,9 @@ def main():
         it = dict(it, id=sid, channel=ch)
         if not it.get("text"):
             continue
+        it["text"] = clean_text(it["text"])  # 電話番号・LINE特典の文は、作った時点で取り除く
+        if not re.fullmatch(r"H\d{1,2}", str(it.get("hook") or "")):
+            it["hook"] = ""
         hh, mm = map(int, t.split(":"))
         it["scheduled_at"] = dt.datetime(d.year, d.month, d.day, hh, mm,
                                          tzinfo=now().tzinfo).isoformat()
@@ -298,6 +368,10 @@ def main():
             issues = compliance.check(full, ch)
         it["compliance"] = issues
         it["status"] = "held" if (issues and cfg["safety"]["hold_on_any_ng"]) else "pending"
+        # 点検スクリプト（構成の抜け・決めごと・重複）。✖があれば保留、△はメールで知らせる
+        it["lint"] = L.lint(it, cfg, history + items)
+        if any(x["level"] == "error" for x in it["lint"]) and cfg["safety"].get("hold_on_lint_error", True):
+            it["status"] = "held"
         if it["status"] == "held":
             held.append(it)
         if ch in ("instagram", "gbp"):
@@ -313,13 +387,22 @@ def main():
              f"週のテーマ: {plan.get('week_theme')}", "", "▼調べた最新情報", str(plan.get("research_notes")), ""]
     for it in items:
         mark = "⚠保留" if it["status"] == "held" else "予約"
-        lines.append(f"[{mark}] {it['scheduled_at'][5:16]} {it['channel']} — {it.get('topic','')}")
+        lines.append(f"[{mark}] {it['scheduled_at'][5:16]} {it['channel']} {it.get('hook','')} — {it.get('topic','')}"
+                     + (f"  〔点検 {L.summarize(it['lint'])}〕" if it.get("lint") else ""))
     if held:
         lines += ["", "⚠保留の投稿はNG表現が残ったため自動投稿しません。GitHubの data/queue で直し、"
                       "status を pending に変えると投稿されます。"]
         for it in held:
-            lines += [f"--- {it['id']} / NG: {[i['word'] for i in it['compliance']]}", it["text"]]
+            lines += [f"--- {it['id']} / NG: {[i['word'] for i in it['compliance']]}"
+                      f" / 点検: {[i['msg'] for i in it.get('lint', []) if i['level'] == 'error']}", it["text"]]
+    noted = [it for it in items if it.get("lint")]
+    if noted:
+        lines += ["", "▼点検で気になった点（△は予約済み。直すとさらに良くなります）"]
+        for it in noted:
+            lines += [f"・{it['id']}: " + " ／ ".join(i["msg"] for i in it["lint"])]
     lines += ["", "止めたい投稿があれば、その status を skip に変えてください。"]
+    save_usage("weekly-generate")
+    lines += ["", f"今回のClaude API使用量: 入力{USAGE['input_tokens']:,}／出力{USAGE['output_tokens']:,}トークン、検索{USAGE['web_searches']}回"]
     notify(f"来週の投稿{len(items)}件を予約しました", "\n".join(lines))
 
 

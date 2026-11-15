@@ -11,7 +11,11 @@
 | フック | `.claude/hooks/block_secrets.py` | APIキー・トークン・`.env` の書き込みを止める |
 | フック | `.claude/hooks/ad_check.py` | `posts/` と `data/queue/` の保存時に `crea/compliance.py` で法規チェック。NGなら書き直させる |
 | スキル | `.claude/skills/crea-*` | 最新確認・来週分の確認・媒体別の作り方・広告チェック |
-| 知識 | `knowledge/` | 広告ルールの根拠・学び・最新確認ログ |
+| 知識 | `knowledge/` | 広告ルールの根拠・冒頭フックの型・指摘メモ・学び・最新確認ログ |
+| 点検 | `crea/lint.py` | 構成の抜け・決めごと・重複（`python3 -m crea.lint`） |
+| 記録 | `crea/report.py`、`data/log/` | 毎晩の数字集計と一覧 |
+
+全体の地図は `docs/ecosystem.md`。
 | 出力 | `posts/` | 手で作った単発の投稿 |
 
 ## スキル

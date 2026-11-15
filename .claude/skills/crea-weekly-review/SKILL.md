@@ -13,6 +13,8 @@ description: 日曜に自動生成された来週分の予約投稿（data/queue
    - 事実が `config.yaml` と合っているか（住所・時間・メニュー名）
    - 天気・行事など日付のある情報が、公開日時点で古くならないか
    - `/crea-ad-review` の7項目
+   - `python3 -m crea.lint` の結果（✖は必ず直す。△は直せるものを直す）
+   - 1行目の型（`hook`）が `knowledge/hooks.md` にあり、同じ媒体で3回続いていないか
    - 1行目（Googleマップ・HPBは冒頭2行）で誰向けか分かるか
 5. 一覧表で出す：`id`／媒体／公開日時／判定（OK・要修正・保留）／理由
 
@@ -23,3 +25,4 @@ description: 日曜に自動生成された来週分の予約投稿（data/queue
 
 ## 最後に
 直した理由のうち次も使えるものを `knowledge/learnings.md` に追記する。
+オーナーから直しの指示があった場合は、その内容を `knowledge/feedback.md` に1行で残す。

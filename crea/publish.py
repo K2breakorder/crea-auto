@@ -2,24 +2,17 @@
 
 実行: python -m crea.publish
 """
-import datetime as dt, traceback, re
-from .common import config, now, all_queue_items, save_json, notify
+import datetime as dt, hashlib, re, traceback
+from .common import config, now, all_queue_items, save_json, notify, clean_text
 from . import compliance, publishers as P
 
 GRACE_HOURS = 12  # 予約時刻から12時間以上遅れたものは出さない（古い話題を防ぐ）
 
 
-def clean_text(t):
-    """店舗情報から電話番号の行と、LINEの後ろの特典カッコ書きを取り除く"""
-    t = re.sub(r"^.*(TEL|電話|☎)[^\n]*\d{2,4}-\d{2,4}-\d{3,4}.*\n?", "", t, flags=re.M)
-    t = re.sub(r"\d{2,4}-\d{3,4}-\d{4}", "", t)
-    t = re.sub(r"(LINE)\s*[（(][^）)\n]*(カウンセリング|ドリンク|特典)[^）)\n]*[）)]", r"\1", t)
-    t = re.sub(r"(LINE)\s*[：:][^\n]*ドリンクサービス[^\n]*", r"\1", t)
-    # 特典の文（カウンセリング長め・ドリンクサービス）を文ごと取り除く
-    t = re.sub(r"^[^\n。]*ドリンクサービス[^\n。]*$\n?", "", t, flags=re.M)
-    t = re.sub(r"[^。\n]*ドリンクサービス[^。\n]*。", "", t)
-    t = re.sub(r"\n{3,}", "\n\n", t)
-    return t
+def fingerprint(it):
+    """同じ投稿を2回出さないための印（媒体＋本文。空白と電話番号などの違いは無視）"""
+    body = re.sub(r"\s+", "", clean_text((it.get("title") or "") + it.get("text", "")))
+    return it.get("channel", "") + ":" + hashlib.sha1(body.encode("utf-8")).hexdigest()
 
 
 def main():
@@ -30,6 +23,9 @@ def main():
         done_today += sum(1 for it in q["items"]
                           if it.get("posted_at", "")[:10] == t.date().isoformat())
     failures, posted = [], []
+    # すでに出した投稿の印（同じ媒体に同じ文を2回出さない）
+    sent = {fingerprint(it) for _, q in all_queue_items() for it in q["items"]
+            if it.get("status") in ("posted", "manual")}
 
     for path, q in all_queue_items():
         changed = False
@@ -44,6 +40,11 @@ def main():
             if done_today >= cfg["safety"]["max_posts_per_day"]:
                 break
             it["text"] = clean_text(it["text"])
+            fp = fingerprint(it)
+            if fp in sent:
+                it["status"] = "duplicate"; changed = True
+                failures.append(f"{it['id']}: すでに同じ文を出しているため見送りました")
+                continue
             # 投稿直前にもう一度NGチェック（手で直した場合も安全に）
             full = (it.get("title", "") + "\n" + it["text"]) if it["channel"] in ("hpb_blog", "ameblo") else it["text"]
             ng = compliance.check(full, it["channel"])
@@ -67,14 +68,18 @@ def main():
                     res = P.post_ameblo(it)
                 else:
                     continue
-                it.update(status="posted", posted_at=now().isoformat(), result=res)
+                it.update(status="posted", posted_at=now().isoformat(), result=res, fingerprint=fp)
+                sent.add(fp)
+                save_json(path, q)  # 1件ごとに「投稿済み」の印をすぐ保存（途中で止まっても二重に出さない）
                 posted.append(f"{ch}: {it.get('topic','')}")
                 done_today += 1
             except P.MissingConfig as e:
                 # まだ連携していない媒体 → 原稿をメールで届けて手動投稿してもらう
                 notify(f"{it['channel']}は未連携のため原稿をお送りします",
                        f"({e})\n予定: {it['scheduled_at'][:16]}\n\n{it.get('title','')}\n{it['text']}")
-                it.update(status="manual", posted_at=now().isoformat())
+                it.update(status="manual", posted_at=now().isoformat(), fingerprint=fp)
+                sent.add(fp)
+                save_json(path, q)
             except Exception as e:
                 it["attempts"] = it.get("attempts", 0) + 1
                 it["last_error"] = str(e)[:500]
@@ -89,7 +94,8 @@ def main():
     print("投稿:", posted or "なし")
     if failures:
         notify("投稿できなかったものがあります",
-               "\n".join(failures) + "\n\n多くはトークン期限切れ・設定漏れです。手順書の『困ったとき』を見てください。")
+               "\n".join(failures) + "\n\n「NG表現」は文を直して status を pending に、「同じ文」は対応不要です。"
+               "それ以外の多くはトークン期限切れ・設定漏れです。手順書の『困ったとき』を見てください。")
 
 
 if __name__ == "__main__":

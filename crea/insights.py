@@ -36,9 +36,8 @@ def threads_metrics(mid, tok):
     return m, round(score, 1)
 
 
-def main():
-    if DRY_RUN:
-        print("DRY_RUN: 実績取得はスキップ"); return
+def collect():
+    """投稿済みのInstagram・Threadsの数字を集めて一覧で返す（新しい順ではなく予約順）"""
     ig_tok, th_tok = os.environ.get("IG_ACCESS_TOKEN"), os.environ.get("THREADS_ACCESS_TOKEN")
     posts = []
     for _, q in all_queue_items():
@@ -52,9 +51,18 @@ def main():
                 m, s = threads_metrics(mid, th_tok)
             else:
                 continue
+            first = next((l.strip() for l in it["text"].split("\n") if l.strip()), "")
             posts.append({"id": it["id"], "channel": it["channel"], "topic": it.get("topic"),
-                          "first_line": it["text"].split("\n")[0][:60], "metrics": m, "score": s})
-    save_json(DATA / "performance.json", {"posts": posts[-200:]})
+                          "hook": it.get("hook") or "", "posted_at": (it.get("posted_at") or "")[:16],
+                          "first_line": first[:60], "metrics": m, "score": s})
+    return posts[-200:]
+
+
+def main():
+    if DRY_RUN:
+        print("DRY_RUN: 実績取得はスキップ"); return
+    posts = collect()
+    save_json(DATA / "performance.json", {"posts": posts})
     if posts:
         top = sorted(posts, key=lambda p: p["score"], reverse=True)[:3]
         notify("先週までの反応レポート", "伸びた投稿 TOP3\n" + "\n".join(

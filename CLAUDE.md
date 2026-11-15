@@ -9,16 +9,22 @@ Claude Code で作業するときは、まずこのファイルを守ってく�
 |---|---|---|
 | 毎週日曜 18:17 | 反応を集める → 最新情報を検索 → 来週分を作成 → 法規チェック → 画像作成 → メール | `.github/workflows/weekly-generate.yml` → `crea/insights.py` `crea/generate.py` |
 | 30分ごと | 予約時刻を過ぎた投稿を公開 | `publish.yml` → `crea/publish.py` |
+| 毎晩 22:03 | 数字を集める → 投稿の一覧と日ごとの推移を記録 → 「今日のまとめ」メール | `nightly-report.yml` → `crea/report.py` |
 | 月2回 | Instagram・Threadsのトークン更新 | `refresh-tokens.yml` |
 
 - 作られた投稿の予約一覧：`data/queue/week-YYYY-MM-DD.json`（`items[]` の `status` が `pending` のものがこれから公開される）
-- 反応の記録：`data/performance.json`
+- 反応の記録：`data/performance.json`（次の週の企画が読む）／投稿の一覧：`data/log/posts.csv`／日ごとの推移：`data/log/daily.csv`
+- Claude API の使用量：`data/costs.json`
+- 全体の地図（人→入口→司令塔→振り分け→担当→ツール→出口）：`docs/ecosystem.md`
 - 投稿画像：`data/images/`
 
 ## 2. 正しい情報の置き場所（ここ以外から事実を作らない）
 - 院の住所・時間・電話・メニュー・強み・ターゲット・投稿枠：**`config.yaml`**
 - 法規チェックのNG語：**`crea/compliance.py`**（ここが唯一の正。フックもこれを使う）
 - 広告ルールの説明と根拠：`knowledge/regulations.md`
+- 構成・決めごと・重複の点検：**`crea/lint.py`**（`python3 -m crea.lint` で来週分を点検）
+- 冒頭フックの型：`knowledge/hooks.md`（1行目はここから選び、番号を `hook` に入れる）
+- オーナーからの指摘：`knowledge/feedback.md`（指摘されたら必ず1行足す。同じ指摘を二度受けない）
 - 学び：`knowledge/learnings.md`／最新確認の記録：`knowledge/latest-check-log.md`
 
 ## 3. Claude Code での作業の流れ
@@ -27,8 +33,8 @@ Claude Code で作業するときは、まずこのファイルを守ってく�
 3. **作る・直す**：
    - 来週分の自動生成を確認・手直し → `/crea-weekly-review`
    - 単発の投稿 → `/crea-gmap-post` `/crea-hpb-blog` `/crea-sns-post` `/crea-line-message`（保存先は `posts/<媒体>/`）
-4. **チェック**：`/crea-ad-review`。保存時にはフックが `crea/compliance.py` で自動チェックする
-5. **学びを残す**：`knowledge/learnings.md` に1〜3行
+4. **チェック**：`/crea-ad-review` と `python3 -m crea.lint`。保存時にはフックが `crea/compliance.py` で自動チェックする
+5. **メモを残す**：オーナーに直されたことは `knowledge/feedback.md`、自分で気づいたことは `knowledge/learnings.md` に1〜3行
 
 ## 4. 広告ルールの要点（厚労省 あはき・柔整広告ガイドライン 2025-02-18 ほか）
 - 効果を約束しない（治る・効く・改善します）。症状名＋効く、と読める書き方をしない
@@ -46,3 +52,5 @@ Claude Code で作業するときは、まずこのファイルを守ってく�
 ## 6. 安全
 - APIキー・トークンはファイルに書かない（GitHub Secrets のみ）。フック block_secrets が止める
 - このリポジトリは公開（Public）。お客様の個人情報・写真は置かない
+- 同じ投稿を2回出さない：`crea/publish.py` が投稿ごとに印（`fingerprint`）を保存し、同じ媒体に同じ文は出さない（`status: duplicate`）
+- 有料の操作（`crea.generate` の実行、有料プランへの変更）と、予約中の投稿の書き換えは、必ずオーナーの確認を取る
