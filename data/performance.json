@@ -1,3 +1,128 @@
 {
-  "posts": []
+  "posts": [
+    {
+      "id": "instagram-1109-1210",
+      "channel": "instagram",
+      "topic": "寒暖差×肩・首の1分セルフケア（保存型）",
+      "first_line": "朝の肩、なんだか重くないですか？",
+      "metrics": {
+        "likes": 3,
+        "comments": 0
+      },
+      "score": 3.0
+    },
+    {
+      "id": "threads-1109-2030",
+      "channel": "threads",
+      "topic": "寒暖差と肩・首のだるさ",
+      "first_line": "今週の三島は、朝晩が一桁〜10℃前後、日中は20℃近くまで上がる日が続く予報です（予報は変わることがあります）。",
+      "metrics": {
+        "views": 11,
+        "likes": 2,
+        "replies": 0,
+        "reposts": 0
+      },
+      "score": 2.1
+    },
+    {
+      "id": "threads-1110-2030",
+      "channel": "threads",
+      "topic": "肩のすくみと血流の仕組み",
+      "first_line": "寒いと、人は無意識に肩をすくめます。首まわりに力が入り、背中も丸まりやすくなります。",
+      "metrics": {
+        "views": 9,
+        "likes": 0,
+        "replies": 0,
+        "reposts": 0
+      },
+      "score": 0.1
+    },
+    {
+      "id": "instagram-1111-1210",
+      "channel": "instagram",
+      "topic": "肩・首のこわばりと足元のつながり（からだの仕組み）",
+      "first_line": "肩のこわばり、実は足元とつながっているかも。",
+      "metrics": {
+        "likes": 4,
+        "comments": 0
+      },
+      "score": 4.0
+    },
+    {
+      "id": "threads-1111-2030",
+      "channel": "threads",
+      "topic": "三首を温める1分セルフケア",
+      "first_line": "【保存用】寒暖差の週は「三首」を温めるのがおすすめです。",
+      "metrics": {
+        "views": 13,
+        "likes": 2,
+        "replies": 0,
+        "reposts": 0
+      },
+      "score": 2.1
+    },
+    {
+      "id": "threads-1112-830",
+      "channel": "threads",
+      "topic": "入浴のタイミングと温度",
+      "first_line": "日中は20℃まで上がっても、朝晩はぐっと冷える今週。夜はお風呂で温まりたくなりますよね。",
+      "metrics": {
+        "views": 6,
+        "likes": 1,
+        "replies": 0,
+        "reposts": 0
+      },
+      "score": 1.1
+    },
+    {
+      "id": "threads-1113-830",
+      "channel": "threads",
+      "topic": "朝の肩・首と表情",
+      "first_line": "朝の鏡で、顔がこわばって見える日はありませんか？",
+      "metrics": {
+        "views": 1,
+        "likes": 0,
+        "replies": 0,
+        "reposts": 0
+      },
+      "score": 0.0
+    },
+    {
+      "id": "instagram-1113-1930",
+      "channel": "instagram",
+      "topic": "週末ひとこと×来院のきっかけ（肩・首と表情の印象）",
+      "first_line": "金曜の夜、肩が上がったままになっていませんか？",
+      "metrics": {
+        "likes": 0,
+        "comments": 0
+      },
+      "score": 0.0
+    },
+    {
+      "id": "threads-1114-830",
+      "channel": "threads",
+      "topic": "三島の週末ひとこと（足首）",
+      "first_line": "三島の週末ひとこと。",
+      "metrics": {
+        "views": 8,
+        "likes": 1,
+        "replies": 0,
+        "reposts": 0
+      },
+      "score": 1.1
+    },
+    {
+      "id": "threads-1115-830",
+      "channel": "threads",
+      "topic": "来院のきっかけ",
+      "first_line": "「原因がはっきりしない不調が、ずっと続いている」",
+      "metrics": {
+        "views": 1,
+        "likes": 1,
+        "replies": 0,
+        "reposts": 0
+      },
+      "score": 1.0
+    }
+  ]
 }
