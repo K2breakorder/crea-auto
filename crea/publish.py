@@ -22,6 +22,47 @@ def clean_text(t):
     return t
 
 
+def ig_to_gbp_text(it, cfg):
+    """Instagramの投稿文をGoogleマップ用に整える（同じ内容・同時刻で出すため）"""
+    lines = []
+    for ln in it["text"].splitlines():
+        if re.match(r"^\s*(#\S+\s*)+$", ln):        # ハッシュタグだけの行
+            continue
+        if "保存" in ln and ln.strip().startswith(("▶", "▷", "→", "📌", "＼")):  # 「保存してね」の呼びかけ
+            continue
+        lines.append(ln)
+    t = "\n".join(lines).strip()
+    head = it.get("headline", "").replace("\n", "")
+    if head and head not in t[:80]:
+        t = f"【三島駅南口徒歩3分】{head}\n\n" + t
+    c = cfg["clinic"]
+    if c["hotpepper"] not in t:
+        t += f"\n▶ネット予約（ホットペッパービューティー）\n{c['hotpepper']}"
+    if c["line_url"] not in t:
+        t += f"\n▶LINE（下の「予約」ボタンからも）\n{c['line_url']}"
+    return clean_text(t)[:1500]
+
+
+def mirror_to_gbp(it, cfg):
+    """Instagramと同じ内容・同じ時刻でGoogleマップにも投稿する（失敗してもInstagramには影響させない）"""
+    if not cfg["channels"]["instagram"].get("mirror_to_gbp", True) or it.get("gbp_mirror"):
+        return None
+    g = {"text": ig_to_gbp_text(it, cfg), "image": it.get("image")}
+    ng = compliance.check(g["text"], "gbp")
+    if ng:
+        it["gbp_mirror"] = {"status": "held", "ng": [x["word"] for x in ng]}
+        return f"Googleマップ転載はNG表現のため保留 {[x['word'] for x in ng]}"
+    try:
+        res = P.post_gbp(g, cfg["clinic"]["line_url"])
+        it["gbp_mirror"] = {"status": "posted", "posted_at": now().isoformat(), "result": res}
+    except P.MissingConfig:
+        it["gbp_mirror"] = {"status": "skipped"}
+    except Exception as e:
+        it["gbp_mirror"] = {"status": "failed", "error": str(e)[:300]}
+        return f"Googleマップ転載に失敗: {e}"
+    return None
+
+
 def main():
     cfg = config()
     t = now()
@@ -55,6 +96,10 @@ def main():
                 ch = it["channel"]
                 if ch == "instagram":
                     res = P.post_instagram(it)
+                    it.update(status="posted", posted_at=now().isoformat(), result=res)
+                    err = mirror_to_gbp(it, cfg)   # 同じ内容・同時刻でGoogleマップにも
+                    if err:
+                        failures.append(f"{it['id']}: {err}")
                 elif ch == "threads":
                     res = P.post_threads(it)
                 elif ch == "gbp":

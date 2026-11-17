@@ -49,6 +49,7 @@ channels:
   instagram:
     enabled: true
     slots: [{day: mon, time: "9:00"}, {day: wed, time: "9:00"}, {day: fri, time: "9:00"}]   # 毎回朝9:00
+    mirror_to_gbp: true   # Instagramと同じ内容・同時刻でGoogleマップにも投稿
   threads:
     enabled: true
     slots: [{day: mon, time: "8:30"}, {day: tue, time: "8:30"}, {day: wed, time: "8:30"},
