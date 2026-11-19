@@ -227,7 +227,11 @@
       "image": "gbp-1119-1300-2026.jpg",
       "scheduled_at": "2026-11-19T12:55:00+09:00",
       "compliance": [],
-      "status": "pending"
+      "status": "posted",
+      "posted_at": "2026-11-19T13:00:55.683056+09:00",
+      "result": {
+        "post_name": "accounts/118437616474757454249/locations/10811346000007817870/localPosts/910409494724262243"
+      }
     },
     {
       "id": "threads-1120-830",
