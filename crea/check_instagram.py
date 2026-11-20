@@ -15,6 +15,15 @@ def show(name, url, params, secret):
 if tok and iid:
     show("Instagram アカウント", f"https://{HOST}/{V}/{iid}", {"fields": "id,username,followers_count"}, tok)
     show("Instagram 場所タグ用ページ", f"https://{HOST}/{V}/me/accounts", {"fields": "id,name,location,instagram_business_account"}, tok)
+    try:
+        _m = requests.get(f"https://{HOST}/{V}/{iid}/media", params={"fields": "id,timestamp,comments_count", "limit": 5, "access_token": tok}, timeout=30).json().get("data", [])
+        print("\n== Instagram 最近の投稿:", [(m.get("timestamp", "")[:10], m.get("comments_count")) for m in _m])
+        _c = next((m for m in _m if m.get("comments_count")), _m[0] if _m else None)
+        if _c:
+            show("Instagram コメント読み取り（自動DM用）", f"https://{HOST}/{V}/{_c['id']}/comments", {"fields": "id,text,username,timestamp", "limit": 3}, tok)
+    except Exception as e:
+        print("コメント確認エラー", e)
+    show("Instagram DM権限（会話一覧）", f"https://{HOST}/{V}/{iid}/conversations", {"platform": "instagram", "limit": 1}, tok)
     show("Instagram 投稿枠", f"https://{HOST}/{V}/{iid}/content_publishing_limit", {"fields": "quota_usage,config"}, tok)
 if th:
     show("Threads アカウント", "https://graph.threads.net/v1.0/me", {"fields": "id,username"}, th)
