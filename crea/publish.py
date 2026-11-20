@@ -132,6 +132,12 @@ def main():
             save_json(path, q)
 
     print("投稿:", posted or "なし")
+    # Instagramのコメント「相談」へ自動DM（失敗しても投稿処理には影響させない）
+    try:
+        from . import autodm
+        autodm.run()
+    except Exception as e:
+        print("自動DMでエラー:", e)
     if failures:
         notify("投稿できなかったものがあります",
                "\n".join(failures) + "\n\n多くはトークン期限切れ・設定漏れです。手順書の『困ったとき』を見てください。")

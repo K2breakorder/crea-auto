@@ -70,6 +70,11 @@ channels:
     slot: {day: thu, time: "12:00"}
 
 # 安全装置
+autodm:            # Instagramのコメントにキーワードがあれば、LINEのご相談窓口をDMで送る
+  enabled: true
+  keywords: ["相談"]
+  own_username: crea_mishima
+  public_reply: "コメントありがとうございます！DMをお送りしましたのでご確認ください😊"
 safety:
   hold_on_any_ng: true      # NG表現が1つでも残ったら投稿せず保留にしてメールで知らせる
   max_posts_per_day: 8      # 万一の暴走防止
