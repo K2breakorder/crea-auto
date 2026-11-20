@@ -41,8 +41,14 @@ if gid and gsec and grt:
         at = r.json()["access_token"]
         h = {"Authorization": f"Bearer {at}"}
         for name, url in [("Google 店舗情報", f"https://mybusinessbusinessinformation.googleapis.com/v1/locations/{gloc}?readMask=name,title"),
-                          ("Google 投稿一覧（最新1件）", f"https://mybusiness.googleapis.com/v4/accounts/{gacc}/locations/{gloc}/localPosts?pageSize=1")]:
+                          ("Google 投稿一覧（最新1件）", f"https://mybusiness.googleapis.com/v4/accounts/{gacc}/locations/{gloc}/localPosts?pageSize=1"),
+                          ("Google 口コミ（件数・評価）", f"https://mybusiness.googleapis.com/v4/accounts/{gacc}/locations/{gloc}/reviews?pageSize=50")]:
             x = requests.get(url, headers=h, timeout=30)
+            if "口コミ" in name and x.ok:
+                j = x.json(); rv = j.get("reviews", [])
+                print(f"\n== {name}: HTTP 200\n" + str({"total": j.get("totalReviewCount"), "average": j.get("averageRating"),
+                      "recent": [(r.get("createTime", "")[:10], r.get("starRating")) for r in rv[:15]]}))
+                continue
             print(f"\n== {name}: HTTP {x.status_code}\n" + x.text.replace(at, "***")[:500])
 else:
     print("\n== Google: 未登録の項目があります", {"CLIENT_ID": bool(gid), "SECRET": bool(gsec), "REFRESH_TOKEN": bool(grt)})
