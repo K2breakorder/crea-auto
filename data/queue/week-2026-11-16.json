@@ -321,7 +321,11 @@
       "channel": "threads",
       "scheduled_at": "2026-11-22T08:30:00+09:00",
       "compliance": [],
-      "status": "pending"
+      "status": "posted",
+      "posted_at": "2026-11-22T08:31:18.398214+09:00",
+      "result": {
+        "media_id": "18224547445345376"
+      }
     }
   ]
 }
