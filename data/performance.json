@@ -6,10 +6,10 @@
       "topic": "寒暖差×肩・首の1分セルフケア（保存型）",
       "first_line": "朝の肩、なんだか重くないですか？",
       "metrics": {
-        "likes": 3,
+        "likes": 4,
         "comments": 0
       },
-      "score": 3.0
+      "score": 4.0
     },
     {
       "id": "threads-1109-2030",
@@ -116,6 +116,130 @@
       "channel": "threads",
       "topic": "来院のきっかけ",
       "first_line": "「原因がはっきりしない不調が、ずっと続いている」",
+      "metrics": {
+        "views": 1,
+        "likes": 1,
+        "replies": 0,
+        "reposts": 0
+      },
+      "score": 1.0
+    },
+    {
+      "id": "threads-1116-830",
+      "channel": "threads",
+      "topic": "雨の週の頭と首の重さ",
+      "first_line": "雨が続くと、頭と首がどんより重い…そんな夜はありませんか？",
+      "metrics": {
+        "views": 1,
+        "likes": 1,
+        "replies": 0,
+        "reposts": 0
+      },
+      "score": 1.0
+    },
+    {
+      "id": "instagram-1116-1210",
+      "channel": "instagram",
+      "topic": "雨の日の頭の重さ×耳まわりケア",
+      "first_line": "雨の日の「頭の重さ」、耳まわりが固まっていませんか？☔",
+      "metrics": {
+        "likes": 3,
+        "comments": 0
+      },
+      "score": 3.0
+    },
+    {
+      "id": "threads-1117-830",
+      "channel": "threads",
+      "topic": "雨の日の耳まわりセルフケア",
+      "first_line": "雨の日の頭の重さには、耳まわりをゆるめる方法があります。",
+      "metrics": {
+        "views": 7,
+        "likes": 1,
+        "replies": 0,
+        "reposts": 0
+      },
+      "score": 1.1
+    },
+    {
+      "id": "threads-1118-830",
+      "channel": "threads",
+      "topic": "雨のあとも残る寒暖差の重さ",
+      "first_line": "雨の週が明けても、頭や首の重さが残る日はありませんか？",
+      "metrics": {
+        "views": 4,
+        "likes": 1,
+        "replies": 0,
+        "reposts": 0
+      },
+      "score": 1.0
+    },
+    {
+      "id": "instagram-1118-1210",
+      "channel": "instagram",
+      "topic": "ゆらぎ肌×表情のこわばり",
+      "first_line": "肌がくすんで見える日は、顔のこわばりが関係しているかも？",
+      "metrics": {
+        "likes": 2,
+        "comments": 0
+      },
+      "score": 2.0
+    },
+    {
+      "id": "threads-1119-830",
+      "channel": "threads",
+      "topic": "相談先がわからない方へ",
+      "first_line": "「この不調、どこに相談すればいいのかわからない」",
+      "metrics": {
+        "views": 5,
+        "likes": 1,
+        "replies": 0,
+        "reposts": 0
+      },
+      "score": 1.1
+    },
+    {
+      "id": "threads-1120-830",
+      "channel": "threads",
+      "topic": "ゆらぎ肌と表情のこわばり",
+      "first_line": "おはようございます。朝の鏡で、顔がこわばって見える日はありませんか？",
+      "metrics": {
+        "views": 2,
+        "likes": 1,
+        "replies": 0,
+        "reposts": 0
+      },
+      "score": 1.0
+    },
+    {
+      "id": "instagram-1120-1930",
+      "channel": "instagram",
+      "topic": "3連休前に、どこに相談すればいいか分からない不調へ",
+      "first_line": "「どこに相談すればいいか分からない」そんな不調、ありませんか？",
+      "metrics": {
+        "likes": 0,
+        "comments": 0
+      },
+      "score": 0.0
+    },
+    {
+      "id": "threads-1121-830",
+      "channel": "threads",
+      "topic": "3連休初日のおでかけ前の整え",
+      "first_line": "おはようございます。今日から3連休ですね。",
+      "metrics": {
+        "views": 4,
+        "likes": 1,
+        "replies": 0,
+        "reposts": 0
+      },
+      "score": 1.0
+    },
+    {
+      "id": "threads-1122-830",
+      "channel": "threads",
+      "topic": "連休の夜のひとこと・口コミのお願い",
+      "first_line": "日曜の夜。雨と寒暖差の一週間、体はがんばっていたかもしれません。",
       "metrics": {
         "views": 1,
         "likes": 1,
