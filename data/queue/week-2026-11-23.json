@@ -65,8 +65,19 @@
       "channel": "instagram",
       "scheduled_at": "2026-11-23T09:00:00+09:00",
       "compliance": [],
-      "status": "pending",
-      "image": "instagram-1123-900-2026.jpg"
+      "status": "posted",
+      "image": "instagram-1123-900-2026.jpg",
+      "posted_at": "2026-11-23T09:01:10.059854+09:00",
+      "result": {
+        "media_id": "18160799554512424"
+      },
+      "gbp_mirror": {
+        "status": "posted",
+        "posted_at": "2026-11-23T09:01:10.059836+09:00",
+        "result": {
+          "post_name": "accounts/118437616474757454249/locations/10811346000007817870/localPosts/9088100041735717716"
+        }
+      }
     },
     {
       "id": "threads-1124-830",
