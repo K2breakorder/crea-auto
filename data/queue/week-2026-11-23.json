@@ -132,8 +132,12 @@
       "channel": "gbp",
       "scheduled_at": "2026-11-24T10:00:00+09:00",
       "compliance": [],
-      "status": "pending",
-      "image": "gbp-1124-1000-2026.jpg"
+      "status": "posted",
+      "image": "gbp-1124-1000-2026.jpg",
+      "posted_at": "2026-11-24T10:00:57.009511+09:00",
+      "result": {
+        "post_name": "accounts/118437616474757454249/locations/10811346000007817870/localPosts/6237021935521290499"
+      }
     },
     {
       "id": "threads-1125-830",
