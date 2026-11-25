@@ -209,7 +209,11 @@
       "channel": "ameblo",
       "scheduled_at": "2026-11-26T08:05:00+09:00",
       "compliance": [],
-      "status": "pending"
+      "status": "posted",
+      "posted_at": "2026-11-26T08:30:50.039554+09:00",
+      "result": {
+        "emailed": true
+      }
     },
     {
       "id": "threads-1126-830",
@@ -222,7 +226,11 @@
       "channel": "threads",
       "scheduled_at": "2026-11-26T08:30:00+09:00",
       "compliance": [],
-      "status": "pending"
+      "status": "posted",
+      "posted_at": "2026-11-26T08:31:26.330818+09:00",
+      "result": {
+        "media_id": "17878079859593213"
+      }
     },
     {
       "id": "gbp-1126-1000",
