@@ -55,6 +55,7 @@ channels:
     slots: [{day: mon, time: "8:30"}, {day: tue, time: "8:30"}, {day: wed, time: "8:30"},
             {day: thu, time: "8:30"}, {day: fri, time: "8:30"}, {day: sat, time: "8:30"},
             {day: sun, time: "8:30"}]   # 毎朝8:30
+    posts_per_day: 10    # 8:30の本投稿＋同じテーマの追加9本（6:30〜翌0:30、2時間おき）
   gbp:            # Googleマップ（Googleビジネスプロフィール）
     enabled: true
     slots: [{day: tue, time: "10:00"}, {day: thu, time: "10:00"}, {day: sat, time: "9:00"}]  # MEO重視で週3本
@@ -77,4 +78,4 @@ autodm:            # Instagramのコメントにキーワードがあれば、LI
   public_reply: "コメントありがとうございます！DMをお送りしましたのでご確認ください😊"
 safety:
   hold_on_any_ng: true      # NG表現が1つでも残ったら投稿せず保留にしてメールで知らせる
-  max_posts_per_day: 8      # 万一の暴走防止
+  max_posts_per_day: 20     # 万一の暴走防止

@@ -65,6 +65,12 @@ def mirror_to_gbp(it, cfg):
 
 def main():
     cfg = config()
+    # Threadsの追加投稿（1日10本）を2日先まで用意する（失敗しても投稿処理は続ける）
+    try:
+        from . import threads_extra
+        threads_extra.fill(cfg)
+    except Exception as e:
+        print("Threads追加投稿の作成でエラー:", e)
     t = now()
     done_today = 0
     for _, q in all_queue_items():
