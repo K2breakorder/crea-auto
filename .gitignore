@@ -3,3 +3,10 @@ __pycache__/
 .env
 .env.*
 graphify-out/cache/
+
+# launch-your-agent（Anthropic）で作るエージェント用フォルダ。鍵(.env)が入るので公開リポジトリに載せない
+my-agent/
+my-agent-archived-*/
+test-runs/
+*.env
+CLAUDE.local.md

@@ -28,6 +28,8 @@ Claude Code で作業するときは、まずこのファイルを守ってく�
    - 来週分の自動生成を確認・手直し → `/crea-weekly-review`
    - 単発の投稿 → `/crea-gmap-post` `/crea-hpb-blog` `/crea-sns-post` `/crea-line-message`（保存先は `posts/<媒体>/`）
 4. **チェック**：`/crea-ad-review`。保存時にはフックが `crea/compliance.py` で自動チェックする
+   - Anthropic公式の追加スキル（marketing・small-business・document-skills など）で作った文も、必ず `/crea-ad-review` を通す。使う・使わないの線引きは `knowledge/anthropic-repos.md`
+   - 自動生成の指示文の点検 → `/crea-prompt-check`／定期で動くエージェントを作る → `/crea-agent-launch`
 5. **学びを残す**：`knowledge/learnings.md` に1〜3行
 
 ## 4. 広告ルールの要点（厚労省 あはき・柔整広告ガイドライン 2025-02-18 ほか）

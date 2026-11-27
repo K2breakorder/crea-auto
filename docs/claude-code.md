@@ -24,7 +24,14 @@
 | `/crea-sns-post` | Instagram・Threads（instagram-agent-ja と併用） |
 | `/crea-line-message` | LINE配信文 |
 | `/crea-ad-review` | 7項目の広告チェックと言い換え |
+| `/crea-prompt-check` | 自動生成の指示文を、Anthropic公式プロンプト講座の9つの型で点検 |
+| `/crea-agent-launch` | Crea用のエージェントを Managed Agents で立ち上げる入口（中で `/launch-your-agent` `/wrap-up` を使う） |
 | `/x-team-setup` | X運用AIチーム（スカウト・スミス・リンカー）を `prompts/x_team_setup.xml` に沿って段階的に構築 |
 
 ## 必要なもの
 Claude Code と python3（フックが `crea/compliance.py` を読み込みます。追加のインストールは不要）。
+
+## Anthropic公式リポジトリから追加したもの（2026-11-27）
+`.claude/settings.json` に3つのマーケットプレイス（anthropics/skills・claude-plugins-official・knowledge-work-plugins）を登録し、
+`document-skills`・`claude-md-management`・`hookify`・`security-guidance`・`session-report`・`skill-creator`・`marketing`・`small-business` を有効化。
+初回に Claude Code を開くと、プラグインを入れるか聞かれるので「はい」。詳しい使い分けは `knowledge/anthropic-repos.md`。
