@@ -550,8 +550,12 @@
       "channel": "threads",
       "scheduled_at": "2026-11-28T08:30:00+09:00",
       "compliance": [],
-      "status": "pending",
-      "extras": 9
+      "status": "posted",
+      "extras": 9,
+      "posted_at": "2026-11-28T08:31:25.148401+09:00",
+      "result": {
+        "media_id": "18133723078692350"
+      }
     },
     {
       "id": "gbp-1128-900",
