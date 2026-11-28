@@ -568,8 +568,12 @@
       "channel": "gbp",
       "scheduled_at": "2026-11-28T09:00:00+09:00",
       "compliance": [],
-      "status": "pending",
-      "image": "gbp-1128-900-2026.jpg"
+      "status": "posted",
+      "image": "gbp-1128-900-2026.jpg",
+      "posted_at": "2026-11-28T09:00:54.802830+09:00",
+      "result": {
+        "post_name": "accounts/118437616474757454249/locations/10811346000007817870/localPosts/8493000534242486872"
+      }
     },
     {
       "id": "threads-1128-x1030",
